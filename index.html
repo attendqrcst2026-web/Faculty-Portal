@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Faculty Portal | AttendQr</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Caveat:wght@600&display=swap" rel="stylesheet">
+  <style>
+    :root { --primary:#2563eb; --primary-light:#eff6ff; --teal-border:#107c65; --card-border:#0f3d3e; --bg-main:#f8fafc; --card-bg:#ffffff; --input-readonly:#e2e8f0; --text-dark:#0f172a; --text-muted:#64748b; --border:#cbd5e1; --border-soft:#e2e8f0; --danger:#ef4444; --success:#10b981; --dark-navy:#0f172a; --orange:#f97316; }
+    body.dark-mode { --bg-main:#0f172a; --card-bg:#1e293b; --input-readonly:#334155; --text-dark:#f8fafc; --text-muted:#94a3b8; --border:#334155; --border-soft:#334155; --primary-light:#1e3a8a; --card-border:#107c65; }
+    * { box-sizing:border-box; margin:0; padding:0; font-family:'Inter',sans-serif; }
+    body { min-height:100vh; background:var(--bg-main); color:var(--text-dark); }
+    .logo-light{display:block} .logo-dark{display:none} body.dark-mode .logo-light{display:none} body.dark-mode .logo-dark{display:block}
+    #auth-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:var(--bg-main)}
+    .auth-split-card{width:100%;max-width:920px;min-height:640px;background:var(--card-bg);border:2px solid var(--card-border);border-radius:16px;display:grid;grid-template-columns:40% 60%;overflow:hidden;box-shadow:0 12px 32px rgba(15,23,42,.08);margin:auto}
+    .auth-left-panel{background:#0b1120;color:#fff;padding:44px 36px;position:relative;display:flex;flex-direction:column;overflow:hidden}
+    .auth-brand-row{display:flex;align-items:center;gap:12px;margin-bottom:10px} .auth-brand-row h2{font-size:1.5rem;font-weight:700;color:#fff}
+    .auth-subtitle{font-size:.88rem;color:#cbd5e1} .auth-shield-watermark{position:absolute;bottom:-35px;right:-25px;width:240px;height:240px;opacity:.04;pointer-events:none}
+    .auth-right-panel{background:var(--card-bg);padding:28px 36px;display:flex;flex-direction:column;overflow-y:auto;max-height:640px}
+    .auth-tabs{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--border-soft);margin-bottom:16px}
+    .auth-tab-btn{background:transparent;border:none;border-bottom:2px solid transparent;padding:8px 0 10px;font-size:.88rem;font-weight:600;color:var(--text-muted);cursor:pointer}
+    .auth-tab-btn.active{color:var(--primary);border-bottom-color:var(--primary)}
+    .auth-form-pane{display:none} .auth-form-pane.active{display:block}
+    .auth-field{margin-bottom:10px} .auth-label{display:block;font-size:.74rem;font-weight:600;color:var(--text-muted);margin-bottom:3px}
+    .auth-input{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:7px;font-size:.82rem;color:var(--text-dark);background:var(--card-bg)}
+    .auth-submit-btn{width:100%;background:#0f172a;color:#fff;border:none;padding:10px;border-radius:7px;font-size:.86rem;font-weight:600;cursor:pointer;margin-top:4px}
+    body.dark-mode .auth-submit-btn{background:var(--primary)}
+    .auth-quick-pitch-btn{width:100%;background:#e0f2fe;color:#0369a1;border:1px dashed #38bdf8;padding:7px;border-radius:7px;font-size:.76rem;font-weight:700;cursor:pointer;margin-bottom:10px}
+    .cursive-send-btn{font-family:'Caveat',cursive;font-size:1.1rem;color:#2563eb;background:none;border:none;cursor:pointer;font-weight:700;margin-left:6px}
+    @media(max-width:768px){ .auth-split-card{grid-template-columns:1fr;min-height:auto} .auth-left-panel{padding:24px 20px;min-height:120px} .auth-right-panel{padding:20px;max-height:none} .workspace{padding:16px!important} .gateway-grid{grid-template-columns:1fr!important} .pro-grid{grid-template-columns:1fr!important} .quick-grid{grid-template-columns:1fr 1fr!important} }
+    #portal-screen{display:none;min-height:100vh;border:2px solid var(--teal-border)}
+    #portal-screen.show{display:block}
+    .sidebar-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.45);backdrop-filter:blur(6px);opacity:0;visibility:hidden;transition:opacity .3s,visibility .3s;z-index:900}
+    .sidebar-backdrop.show{opacity:1;visibility:visible}
+    .sidebar{position:fixed;top:0;left:0;height:100vh;width:260px;background:var(--card-bg);border-right:1px solid var(--teal-border);display:flex;flex-direction:column;justify-content:space-between;transform:translateX(-105%);transition:transform .35s cubic-bezier(.32,.72,0,1);z-index:1000;box-shadow:20px 0 50px rgba(0,0,0,.18)}
+    .sidebar.open{transform:translateX(0)}
+    .brand-header{height:68px;padding:0 22px;border-bottom:1px solid var(--border-soft);display:flex;align-items:center;gap:10px}
+    .brand-title{font-size:1.35rem;font-weight:700}
+    .sidebar-close-btn{margin-left:auto;background:transparent;border:none;font-size:1.2rem;cursor:pointer;color:var(--text-muted);padding:6px;border-radius:6px}
+    .profile-mini{padding:20px 22px;border-bottom:1px solid var(--border-soft);display:flex;align-items:center;gap:12px}
+    .avatar-circle{width:44px;height:44px;border-radius:50%;border:2px solid #3b82f6;display:flex;align-items:center;justify-content:center;color:#3b82f6;background:var(--primary-light);font-weight:700}
+    .nav-menu{padding:16px 12px;display:flex;flex-direction:column;gap:6px;flex:1}
+    .nav-item{display:flex;align-items:center;gap:12px;padding:11px 16px;border-radius:8px;border:none;background:transparent;color:var(--text-muted);font-size:.9rem;font-weight:500;cursor:pointer;text-align:left}
+    .nav-item:hover,.nav-item.active{background:var(--primary-light);color:var(--primary);font-weight:600}
+    #nav-initqr{display:none;border:1px dashed var(--primary)}
+    .logout-box{padding:16px;border-top:1px solid var(--border-soft)}
+    .logout-btn{width:100%;padding:10px;border:1px solid #fca5a5;background:transparent;color:var(--danger);border-radius:8px;font-weight:600;font-size:.85rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+    .main-area{flex:1;display:flex;flex-direction:column;overflow-y:auto;min-height:100vh}
+    .topbar{height:68px;background:var(--card-bg);border-bottom:1px solid var(--teal-border);padding:0 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+    .topbar-left{display:flex;align-items:center;gap:14px}
+    .hamburger-btn{background:var(--bg-main);border:1px solid var(--border);width:42px;height:42px;border-radius:10px;font-size:1.25rem;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-dark)}
+    .topbar h1{font-size:1.4rem;font-weight:700}
+    .topbar-right{display:flex;align-items:center;gap:14px}
+    .checked-in-pill{background:#d1fae5;color:#047857;border:1px solid #6ee7b7;padding:6px 14px;border-radius:999px;font-size:.78rem;font-weight:700;cursor:pointer}
+    .checked-in-pill.checked-out{background:#fee2e2;color:#991b1b;border-color:#fca5a5}
+    .icon-action{background:transparent;border:none;font-size:1.15rem;cursor:pointer;color:var(--text-dark);padding:6px;border-radius:6px}
+    .workspace{padding:28px 34px;flex:1}
+    .view-section{display:none} .view-section.active{display:block}
+    .framed-card{background:var(--card-bg);border:2px solid var(--card-border);border-radius:14px;padding:26px 28px;margin-bottom:24px}
+    .section-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+    .section-top h2{font-size:1.15rem;font-weight:700}
+    .btn-navy{background:var(--dark-navy);color:#fff;border:none;padding:10px 18px;border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer}
+    .btn-cancel{background:#e2e8f0;color:#1e293b;border:none;padding:10px 18px;border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer}
+    .pro-grid{display:grid;grid-template-columns:300px 1fr 300px;gap:20px;align-items:start}
+    .pro-card{background:var(--card-bg);border:1px solid var(--border-soft);border-radius:16px;padding:22px;box-shadow:0 4px 20px rgba(15,23,42,.04);position:relative;overflow:hidden}
+    .pro-card-title{font-size:1rem;font-weight:800;text-align:center;margin-bottom:18px}
+    .expand-icon{position:absolute;top:16px;right:16px;font-size:.8rem;color:var(--text-muted)}
+    .gauge-wrap{width:170px;height:170px;margin:0 auto 16px;position:relative}
+    .gauge{width:100%;height:100%;border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative}
+    .gauge-inner{width:132px;height:132px;background:var(--card-bg);border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;box-shadow:inset 0 0 0 1px var(--border-soft)}
+    .gauge-inner b{font-size:1.25rem;line-height:1} .gauge-inner span{font-size:.72rem;color:var(--text-muted);font-weight:600;margin-top:3px}
+    .gauge-dot{position:absolute;width:18px;height:18px;background:var(--orange);border:3px solid #fff;border-radius:50%;right:18px;bottom:28px}
+    .punch-box{background:#0f172a;color:#fff;border-radius:10px;display:flex;justify-content:space-between;padding:12px 14px;margin-bottom:14px}
+    .punch-box div small{display:block;font-size:.65rem;opacity:.7} .punch-box div b{font-size:.9rem}
+    .btn-orange{width:100%;background:var(--orange);color:#fff;border:none;padding:11px;border-radius:999px;font-weight:700;font-size:.88rem;cursor:pointer}
+    .btn-orange.out{background:#0f172a}
+    .greet-card{background:linear-gradient(135deg,#f8fafc,#eff6ff);border:1px solid var(--border-soft);border-radius:16px;padding:22px;display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}
+    body.dark-mode .greet-card{background:#1e293b}
+    .greet-card h3{font-size:.85rem;font-weight:500;color:var(--text-muted)} .greet-card h2{font-size:1.45rem;font-weight:800} .greet-card p{font-size:.82rem;color:var(--text-muted);margin-top:2px}
+    .quick-label{font-size:.95rem;font-weight:800;margin-bottom:12px}
+    .quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .quick-card{background:#fff;border:1px solid var(--border-soft);border-radius:14px;padding:16px;position:relative;overflow:hidden;cursor:pointer}
+    body.dark-mode .quick-card{background:#1e293b}
+    .quick-card h4{font-size:.85rem;font-weight:700} .quick-card p{font-size:.78rem;color:var(--text-muted);margin-top:6px}
+    .quick-card p b{color:var(--primary)} .quick-card .green{color:#059669;font-weight:700}
+    .quick-card::after{content:'';position:absolute;right:-22px;bottom:-22px;width:68px;height:68px;border-radius:50%;background:#ffedd5;box-shadow:0 0 0 10px #fff7ed,0 0 0 20px #ffedd5;opacity:.9}
+    .security-row{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+    .sec-pill{display:flex;align-items:center;gap:6px;background:#ecfdf5;border:1px solid #a7f3d0;color:#047857;padding:7px 10px;border-radius:999px;font-size:.75rem;font-weight:700}
+    .sec-pill.blue{background:#eff6ff;border-color:#bfdbfe;color:#1d4ed8} .sec-pill.amber{background:#fffbeb;border-color:#fde68a;color:#92400e}
+    .cal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+    .cal-header b{font-size:.95rem} .cal-header small{display:block;text-align:center;color:var(--text-muted);font-size:.75rem}
+    .cal-nav{border:1px solid var(--border);background:var(--card-bg);width:26px;height:26px;border-radius:6px;cursor:pointer;color:var(--text-dark)}
+    .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;font-size:.75rem}
+    .cal-grid .dow{color:var(--text-muted);font-weight:700;padding:6px 0}
+    .cal-day{padding:7px 0;border-radius:999px;cursor:pointer;font-weight:600}
+    .cal-day:hover{background:var(--primary-light)} .cal-day.today{background:var(--primary);color:#fff} .cal-day.selected{background:var(--orange);color:#fff}
+    .cal-legend{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap}
+    .cal-legend button{border:1px solid var(--border);background:var(--card-bg);font-size:.7rem;font-weight:700;padding:6px 10px;border-radius:999px;cursor:pointer;color:var(--text-dark)}
+    .cal-legend button.active{background:var(--orange);color:#fff;border-color:var(--orange)}
+    .cal-selected-info{background:var(--bg-main);border:1px solid var(--border-soft);border-radius:10px;padding:10px;margin-top:12px;font-size:.78rem}
+    .mini-stat{font-size:.78rem;color:var(--text-muted);text-align:center;margin-top:6px} .mini-stat b{color:var(--text-dark);font-size:1rem}
+    .matrix-wrapper{overflow-x:auto;border:1px solid var(--border-soft);border-radius:8px}
+    .matrix-table{width:100%;border-collapse:collapse;min-width:950px}
+    .matrix-table th{background:#0f172a;color:#fff;font-size:.75rem;font-weight:700;text-transform:uppercase;padding:14px 8px;text-align:center}
+    .matrix-table th.time-head{background:#1e293b}
+    .matrix-table td{border:1px solid var(--border-soft);padding:10px 6px;text-align:center;font-size:.82rem;color:var(--text-muted);height:72px;vertical-align:middle}
+    .matrix-table td.day-col{background:#eef7f4;color:#0f172a;font-weight:800;border-right:2px solid var(--teal-border);width:130px;text-transform:uppercase}
+    .matrix-table td.lunch-col{background:#fef3c7;color:#92400e;font-weight:700;font-size:.75rem}
+    .slot-card{background:#dbeafe;border-left:3px solid #2563eb;color:#1e293b;padding:6px 8px;border-radius:6px;text-align:left;font-size:.74rem;cursor:pointer}
+    .slot-card strong{color:#2563eb;display:block}
+    .form-row-3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:18px}
+    .form-row-4{display:grid;grid-template-columns:1fr 2fr;gap:18px;margin-bottom:22px}
+    .field-group label{display:block;font-size:.8rem;font-weight:600;color:var(--text-muted);margin-bottom:6px}
+    .field-control{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg-main);color:var(--text-dark);font-size:.88rem}
+    .period-clock-combo{display:grid;grid-template-columns:1fr 110px;gap:8px}
+    .readonly-box{background:var(--input-readonly);border:1px solid var(--border-soft);padding:11px 14px;border-radius:8px;font-size:.88rem;font-weight:500}
+    .scheduled-box{border:2px solid var(--card-border);border-radius:8px;overflow:hidden;background:var(--card-bg);display:none}
+    .scheduled-header{background:#0f172a;color:#fff;padding:12px 20px;font-size:.9rem;font-weight:600}
+    .scheduled-table{width:100%;border-collapse:collapse}
+    .scheduled-table th{text-align:left;padding:12px 20px;font-size:.75rem;color:var(--text-muted);text-transform:uppercase;border-bottom:1px solid var(--border-soft)}
+    .scheduled-table td{padding:14px 20px;font-size:.88rem;border-bottom:1px solid var(--border-soft)}
+    .btn-init-qr{background:#0f172a;color:#fff;border:none;padding:7px 14px;border-radius:6px;font-size:.8rem;font-weight:600;cursor:pointer}
+    .btn-delete-row{background:#ef4444;color:#fff;border:none;padding:7px 10px;border-radius:6px;cursor:pointer;margin-left:6px}
+    .empty-schedule-msg{color:var(--text-muted);font-size:.9rem;text-align:center;padding:20px;background:var(--bg-main);border-radius:8px;border:1px dashed var(--border)}
+    .gateway-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+    .policy-check{display:flex;align-items:center;gap:10px;padding:11px 14px;border:1px solid var(--border-soft);border-radius:8px;margin-bottom:10px;font-size:.86rem;font-weight:600}
+    .live-qr-panel{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+    .doomsday-clock-container{display:none;flex-direction:column;align-items:center;width:100%;margin-bottom:16px}
+    .doomsday-clock{font-family:'Courier New',monospace;font-size:2.8rem;font-weight:800;color:#dc2626;background:#fef2f2;border:2px dashed #f87171;padding:8px 24px;border-radius:12px;margin:8px 0}
+    .qr-canvas-holder{position:relative;width:240px;height:240px;padding:10px;background:#fff;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;border:1px solid var(--border-soft)}
+    .qr-center-badge{position:absolute;width:52px;height:52px;background:#fff;padding:3px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.2);display:flex;align-items:center;justify-content:center}
+    .btn-terminate{width:100%;background:#ef4444;color:#fff;border:none;padding:12px;border-radius:8px;font-size:.9rem;font-weight:600;cursor:pointer;margin-top:14px;display:none}
+    .gateway-toast{position:fixed;bottom:24px;right:24px;background:var(--card-bg);color:var(--text-dark);border:1px solid var(--border-soft);padding:14px 22px;border-radius:10px;box-shadow:0 10px 25px rgba(0,0,0,.12);display:none;align-items:center;gap:10px;font-size:.88rem;font-weight:600;z-index:999}
+    .schedule-widget-dock{position:fixed;bottom:20px;right:20px;z-index:998;display:none} body.logged-in .schedule-widget-dock{display:block}
+    .widget-toggle-pill{background:var(--dark-navy);color:#fff;border:2px solid var(--teal-border);padding:10px 16px;border-radius:999px;font-size:.82rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px}
+    .widget-popup-card{position:absolute;bottom:50px;right:0;width:280px;background:var(--card-bg);border:2px solid var(--teal-border);border-radius:14px;padding:16px;display:none;flex-direction:column;gap:12px;box-shadow:0 10px 30px rgba(15,23,42,.2)}
+    .widget-popup-card.open{display:flex}
+    .widget-popup-header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border-soft);padding-bottom:8px;font-size:.85rem;font-weight:700}
+    .widget-popup-close{background:none;border:none;font-size:1rem;cursor:pointer;color:var(--text-muted)}
+    .widget-clock{font-family:'Courier New',monospace;font-size:1.3rem;font-weight:800;color:var(--primary);text-align:center;background:var(--bg-main);padding:6px;border-radius:8px;border:1px dashed var(--border)}
+    .widget-section-title{font-size:.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:4px}
+    .widget-date-display{font-size:.88rem;font-weight:600}
+    .widget-upcoming-box{background:var(--bg-main);border:1px solid var(--border-soft);border-radius:8px;padding:8px 10px;font-size:.8rem}
+    .widget-upcoming-box strong{color:var(--primary);display:block}
+    .widget-quick-btn{background:var(--dark-navy);color:#fff;border:none;padding:8px;border-radius:8px;font-size:.78rem;font-weight:600;cursor:pointer}
+  </style>
+</head>
+<body>
+  <svg style="display:none"><symbol id="logo-light-white-bg" viewBox="0 0 100 100"><rect x="2" y="2" width="96" height="96" rx="22" fill="#FFFFFF" stroke="#cbd5e1" stroke-width="3"/><polygon points="34,19 50,12 66,19 50,27" fill="#1542B6"/><rect x="18" y="19" width="26" height="26" rx="6" stroke="#1542B6" stroke-width="6" fill="none"/><rect x="27" y="28" width="8" height="8" rx="2" fill="#1D63DC"/><rect x="56" y="19" width="26" height="26" rx="6" stroke="#1542B6" stroke-width="6" fill="none"/><rect x="65" y="28" width="8" height="8" rx="2" fill="#1D63DC"/><circle cx="50" cy="20" r="2.6" fill="#FFFFFF"/><rect x="47" y="47" width="6.5" height="6.5" rx="1.5" fill="#2563EB"/><rect x="18" y="55" width="26" height="26" rx="6" stroke="#1542B6" stroke-width="6" fill="none"/><rect x="27" y="63" width="3.2" height="10" rx="1.5" fill="#1D63DC"/><rect x="32.5" y="63" width="3.2" height="10" rx="1.5" fill="#1D63DC"/><path d="M53 69 L63 79 L84 56" stroke="#1D63DC" stroke-width="7.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></symbol><symbol id="logo-dark-blue-bg" viewBox="0 0 100 100"><rect width="100" height="100" rx="22" fill="#1D63DC"/><rect x="16" y="16" width="28" height="28" rx="6" stroke="#FFFFFF" stroke-width="6" fill="none"/><rect x="25" y="25" width="10" height="10" rx="2" fill="#FFFFFF"/><rect x="56" y="16" width="28" height="28" rx="6" stroke="#FFFFFF" stroke-width="6" fill="none"/><rect x="65" y="25" width="10" height="10" rx="2" fill="#FFFFFF"/><rect x="16" y="56" width="28" height="28" rx="6" stroke="#FFFFFF" stroke-width="6" fill="none"/><rect x="25" y="65" width="10" height="10" rx="2" fill="#FFFFFF"/><polygon points="50,39 64,46 50,53 36,46" fill="#93C5FD"/><rect x="54" y="55" width="7" height="7" rx="2" fill="#93C5FD"/><path d="M52 71 L63 81 L83 59" stroke="#FFFFFF" stroke-width="7.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></symbol></svg>
+
+  <div id="auth-screen">
+    <div class="auth-split-card">
+      <div class="auth-left-panel"><div class="auth-brand-row"><svg width="42" height="42"><use href="#logo-dark-blue-bg"></use></svg><h2>AttendQr</h2></div><p class="auth-subtitle">Next-Gen Faculty Attendance System</p><svg class="auth-shield-watermark" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3z"/></svg></div>
+      <div class="auth-right-panel">
+        <div class="auth-tabs"><button type="button" class="auth-tab-btn" id="tabBtnLogin" onclick="switchAuthTab('login')">Faculty Login</button><button type="button" class="auth-tab-btn active" id="tabBtnRegister" onclick="switchAuthTab('register')">Register Now</button></div>
+        <div id="authPaneRegister" class="auth-form-pane active"><form onsubmit="handleRegistration(event)"><div class="auth-field"><label class="auth-label">Faculty Designation <span style="color:red">*</span></label><select id="regDesignation" class="auth-input" required><option value="">Select Academic Designation</option><option>Dr.</option><option>Assistant Professor</option><option>Associate Professor</option><option>Professor</option></select></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px" class="auth-field"><div><label class="auth-label">College Registration ID <span style="color:red">*</span></label><input id="regCollegeId" class="auth-input" placeholder="e.g. 0000" required /></div><div><label class="auth-label">Faculty ID 🔒</label><div class="auth-input" style="background:var(--input-readonly);font-weight:600;text-align:center" id="regFrozenId">Frozen (Check Email)</div></div></div><div class="auth-field"><label class="auth-label">Email Address <span style="color:red">*</span> <button type="button" class="cursive-send-btn" onclick="sendFacultyEmail()">Send</button></label><input type="email" id="regEmail" class="auth-input" placeholder="faculty@attendqr.edu" required /></div><div class="auth-field"><label class="auth-label">Prefix & Name Structure <span style="color:red">*</span></label><div style="display:grid;grid-template-columns:85px 1fr 1fr 1fr;gap:6px"><select id="regPrefix" class="auth-input" required><option>Dr.</option><option>Prof.</option><option>Mr.</option><option>Ms.</option><option>Mrs.</option></select><input id="regFirst" class="auth-input" placeholder="First Name *" required /><input id="regMiddle" class="auth-input" placeholder="Middle" /><input id="regLast" class="auth-input" placeholder="Last Name *" required /></div></div><div class="auth-field"><label class="auth-label">Core Department / Program <span style="color:red">*</span></label><select id="regCoreDept" class="auth-input" required><option value="">Select Core Department</option><option>Diploma & Polytechnic Programs</option><option>Undergraduate (Bachelor's) Programs</option><option>Postgraduate (Master's) Programs</option><option>Integrated & Doctoral Programs</option><option>Management, Commerce & Finance</option></select></div><div class="auth-field"><label class="auth-label">Department / Faculty Specialization <span style="color:red">*</span></label><select id="regSpecialization" class="auth-input" required><option value="">Select Specialization</option><option>Computer Science & Engineering (CSE)</option><option>Computer Science & Technology (CST)</option><option>Information Technology (IT)</option></select></div><button type="submit" class="auth-submit-btn">Submit Registration</button></form></div>
+        <div id="authPaneLogin" class="auth-form-pane"><button type="button" class="auth-quick-pitch-btn" onclick="fillPitchCredentials()">⚡ Quick Fill Pitch Credentials (ID: FAC-892X / Pass: 1234)</button><form onsubmit="handleLogin(event)"><div class="auth-field"><label class="auth-label">Faculty ID <span style="color:red">*</span></label><input id="loginFacultyId" class="auth-input" placeholder="Enter Faculty ID (e.g. FAC-892X)" required /></div><div class="auth-field"><label class="auth-label">Password <span style="color:red">*</span></label><input type="password" id="loginPassword" class="auth-input" placeholder="Enter Password" required /></div><button type="submit" class="auth-submit-btn">Login to Faculty Portal</button></form></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="portal-screen">
+    <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeSidebar()"></div>
+    <aside class="sidebar" id="sidebar">
+      <div>
+        <div class="brand-header"><svg class="logo-light" width="34" height="34"><use href="#logo-light-white-bg"></use></svg><svg class="logo-dark" width="34" height="34"><use href="#logo-dark-blue-bg"></use></svg><span class="brand-title">AttendQr</span><button class="sidebar-close-btn" onclick="closeSidebar()">✕</button></div>
+        <div class="profile-mini"><div class="avatar-circle">👤</div><div><h4 id="sidebar-name">Dr. Pitch Demo</h4><p id="sidebar-dept">Computer Science</p></div></div>
+        <nav class="nav-menu">
+          <button id="nav-dashboard" class="nav-item active" onclick="openView('dashboard', this)"><span>⊞</span> Dashboard</button>
+          <button class="nav-item" onclick="openView('routine', this)"><span>📅</span> My Routine</button>
+          <button id="nav-addclass" class="nav-item" onclick="openView('addclass', this)"><span>➕</span> Add Class</button>
+          <button class="nav-item" id="nav-initqr" onclick="openView('initqr', this)"><span>⚡</span> Init QR</button>
+          <button class="nav-item" onclick="openView('logs', this)"><span>📄</span> Attendance Logs</button>
+        </nav>
+      </div>
+      <div class="logout-box"><button class="logout-btn" onclick="handleLogout()"><span>↪</span> Secure Logout</button></div>
+    </aside>
+
+    <main class="main-area">
+      <header class="topbar">
+        <div class="topbar-left"><button class="hamburger-btn" onclick="toggleSidebar()" title="Open Menu">☰</button><h1 id="topbar-title">Overview Dashboard</h1></div>
+        <div class="topbar-right"><div class="checked-in-pill" id="checkInPill" onclick="toggleCheckInStatus()">● CHECKED IN</div><button class="icon-action" onclick="toggleDarkMode()" id="themeToggleBtn">🌙</button><button class="icon-action">🔔</button></div>
+      </header>
+      <div class="workspace">
+        <section id="view-dashboard" class="view-section active">
+          <div class="pro-grid">
+            <div class="pro-card"><span class="expand-icon">⤢</span><div class="pro-card-title">Attendance</div><div class="gauge-wrap"><div class="gauge" id="attendanceGauge" style="background: conic-gradient(#0f172a 0deg 210deg, #f97316 210deg 290deg, #f97316 290deg 360deg);"><div class="gauge-inner"><b id="workingHours">06:43:37</b><span>Working Hours</span><span id="gaugePercent" style="color:#f97316;font-weight:800;font-size:.85rem">82%</span></div><div class="gauge-dot"></div></div></div><div class="punch-box"><div><small>Punch In</small><b id="punchInTime">10:05</b></div><div style="text-align:right"><small>Punch Out</small><b id="punchOutTime">--:--</b></div></div><button class="btn-orange" id="punchBtn" onclick="togglePunch()">Punch Out</button><div style="text-align:center;margin-top:12px;font-size:.75rem;color:var(--text-muted)"><span id="prof-id-dash">FAC-892X</span> • <span id="profStatusText">Checked In</span></div></div>
+            <div><div class="greet-card"><div><h3 id="greetSmall">Hi, Dr. Pitch Demo</h3><h2 id="greetingTitle">Good Morning</h2><p>Have a good day • <span id="prof-dept">Computer Science</span> • <span id="prof-name">Dr. Pitch Demo</span></p><p style="margin-top:6px"><span id="prof-email">dr.pitch@attendqr.edu</span> • <span id="prof-desig">Associate Professor</span></p></div><div style="font-size:3.2rem">⏳<br><span style="font-size:1rem">👨‍🏫💻</span></div></div><div class="quick-label">Quick status</div><div class="quick-grid"><div class="quick-card" onclick="openView('addclass', document.getElementById('nav-addclass'))"><h4>📚 Classes</h4><p><b><span id="stat-scheduled">0</span> Scheduled Today</b><br>Tap to schedule new class</p></div><div class="quick-card" onclick="openView('initqr', document.getElementById('nav-initqr'))"><h4>⚡ QR Gateway</h4><p><span id="stat-active-qr">None</span><br><span class="green">● Active Ready</span> • Dynamic QR</p></div><div class="quick-card"><h4>🏫 Room</h4><p><b>Lab 302</b><br>BNB room 302 • Next: 10:00 AM</p></div><div class="quick-card" onclick="openView('routine', null)"><h4>📅 Next Class</h4><p><b id="nextClassText">Operating System Lab</b><br>10:00 AM - 11:00 AM • Lab 302</p></div></div><div class="security-row"><div class="sec-pill"><span>●</span> 🛡️ Verified Identity</div><div class="sec-pill blue"><span>●</span> 📍 Geo-Fencing ON • 15m</div><div class="sec-pill amber"><span>●</span> 🔒 Dynamic QR • Rotates 10s</div><div class="sec-pill"><span>●</span> ✅ Proxy-Proof</div></div><div class="pro-card" style="margin-top:14px;padding:16px"><div style="display:flex;justify-content:space-between"><b style="font-size:.85rem">Today's Classes</b><span style="font-size:.78rem;color:var(--primary);font-weight:700;cursor:pointer" onclick="openView('routine',null)">View Routine →</span></div><p id="todayClassesList" style="font-size:.82rem;color:var(--text-muted);margin-top:8px">No classes yet. Add one to see it here.</p></div></div>
+            <div style="display:flex;flex-direction:column;gap:20px"><div class="pro-card"><span class="expand-icon">⤢</span><div class="cal-header"><button class="cal-nav" onclick="changeMonth(-1)">‹</button><div><b>Calendar</b><small id="calMonthLabel">November 2026</small></div><button class="cal-nav" onclick="changeMonth(1)">›</button></div><div class="cal-grid" id="miniCalendar"></div><div class="cal-legend"><button class="active" onclick="setCalFilter(this,'all')">+ Create plan</button><button onclick="setCalFilter(this,'class')">Class</button><button onclick="setCalFilter(this,'leave')">Holiday</button></div><div class="cal-selected-info" id="calInfo">📅 <strong id="calSelectedDate">Today</strong> • <span id="calSelectedText">Click a date to see classes</span></div></div><div class="pro-card"><span class="expand-icon">⤢</span><div class="pro-card-title">Attendance Stats</div><div class="gauge-wrap" style="width:130px;height:130px"><div class="gauge" style="background: conic-gradient(#f97316 0deg 288deg, #0f172a 288deg 360deg);"><div class="gauge-inner" style="width:98px;height:98px"><b style="font-size:1.4rem" id="statsDays">16</b><span>Days</span></div></div></div><div class="mini-stat"><b id="statsRatio">16 / 20</b><br>Classes Completed</div><button class="btn-orange" style="margin-top:12px;padding:9px;font-size:.8rem" onclick="openView('addclass', document.getElementById('nav-addclass'))">+ Schedule Class</button><p style="font-size:.72rem;color:var(--text-muted);text-align:center;margin-top:10px">Sessions Logged: <b id="stat-logs" style="color:var(--text-dark)">0</b></p></div></div>
+          </div>
+        </section>
+
+        <section id="view-routine" class="view-section">
+          <div class="framed-card">
+            <div class="section-top"><div><h2>📅 Master Timetable - Classic Routine</h2><p>Days on left, Time on top • 10:00 AM to 5:00 PM • Click a class to Init QR</p></div><button class="btn-navy" onclick="openView('addclass', document.getElementById('nav-addclass'))">+ Manage Routine</button></div>
+            <div class="matrix-wrapper"><table class="matrix-table"><thead><tr><th>DAYS \ TIME</th><th class="time-head">10:00 - 11:00 AM<br><small>P1</small></th><th class="time-head">11:00 - 12:00 PM<br><small>P2</small></th><th class="time-head">12:00 - 01:00 PM<br><small>P3</small></th><th class="time-head">01:00 - 02:00 PM<br><small>LUNCH</small></th><th class="time-head">02:00 - 03:00 PM<br><small>P4</small></th><th class="time-head">03:00 - 04:00 PM<br><small>P5</small></th><th class="time-head">04:00 - 05:00 PM<br><small>P6</small></th></tr></thead><tbody id="matrix-body"></tbody></table></div>
+            <p style="font-size:.78rem;color:var(--text-muted);margin-top:10px">* 1:00 - 2:00 PM is Lunch Break.</p>
+          </div>
+        </section>
+
+        <!-- ADD CLASS - FIXED SUBJECTS -->
+        <section id="view-addclass" class="view-section"><div class="framed-card"><div class="section-top"><h2>Weekly Routine Planner</h2><button class="btn-navy" onclick="document.getElementById('branchSelect').focus()">+ Add Class</button></div>
+        <div class="form-row-3"><div class="field-group"><label>Branch / Program</label><select id="branchSelect" class="field-control" onchange="onBranchChange()"><option value="">Select Branch</option><option value="B.Tech">B.Tech</option><option value="Diploma CST">Diploma CST</option><option value="BCA">BCA</option><option value="Diploma CSE">Diploma CSE</option><option value="Diploma IT">Diploma IT</option></select></div><div class="field-group"><label>Semester</label><select id="semesterSelect" class="field-control" onchange="onSemesterChange()"><option value="">Select Branch First</option></select></div><div class="field-group"><label>Subject <span style="color:#2563eb">● Auto-Filled</span></label><select id="subjectSelect" class="field-control"><option value="">Select Branch & Semester First</option></select></div></div>
+        <div class="form-row-3"><div class="field-group"><label>How Many Periods</label><select id="periodCount" class="field-control" onchange="syncPeriodsToTime()"><option value="1">1 Period</option><option value="2" selected>2 Periods</option><option value="3">3 Periods</option><option value="4">4 Periods</option></select></div><div class="field-group"><label>Starting Period & Clock Time</label><div class="period-clock-combo"><select id="startPeriod" class="field-control" onchange="syncPeriodsToTime()"><option value="1" selected>P1 (10:00)</option><option value="2">P2 (11:00)</option><option value="3">P3 (12:00)</option><option value="4">P4 (02:00)</option><option value="5">P5 (03:00)</option><option value="6">P6 (04:00)</option></select><input type="time" id="startTimeClock" class="field-control" value="10:00" /></div></div><div class="field-group"><label>Ending Period & Clock Time</label><div class="period-clock-combo"><select id="endPeriod" class="field-control"><option value="1">P1 (11:00)</option><option value="2" selected>P2 (12:00)</option><option value="3">P3 (01:00)</option><option value="4">P4 (03:00)</option><option value="5">P5 (04:00)</option><option value="6">P6 (05:00)</option></select><input type="time" id="endTimeClock" class="field-control" value="12:00" /></div></div></div><div class="form-row-4"><div class="field-group"><label>Date (No Past Dates)</label><input type="date" id="classDate" class="field-control" /></div><div class="field-group"><label>Room Number</label><select id="roomSelect" class="field-control" onchange="toggleCustomRoom()"><option>BNB room 302</option><option>Lab 302</option><option>Room 204</option><option value="custom">Other (Write Manually)</option></select><input id="customRoomInput" class="field-control" placeholder="Type custom room..." style="margin-top:8px;display:none" /></div></div><div style="display:flex;gap:10px"><button class="btn-navy" onclick="saveClassToRoutine()">💾 Save to Routine</button><button class="btn-cancel" onclick="resetRoutineForm()">Cancel</button></div></div><div id="emptyScheduleState" class="empty-schedule-msg">📅<br>No classes scheduled. Add a class above.</div><div id="scheduledTableContainer" class="scheduled-box"><div class="scheduled-header">Scheduled Classes</div><table class="scheduled-table"><thead><tr><th>DATE & TIME</th><th>SUBJECT</th><th>SEMESTER</th><th>PERIODS</th><th>ROOM NO</th><th>ACTIONS</th></tr></thead><tbody id="scheduledClassesBody"></tbody></table></div></section>
+
+        <section id="view-initqr" class="view-section"><button class="btn-cancel" style="margin-bottom:18px" onclick="openView('addclass', document.getElementById('nav-addclass'))">← Back to Routine</button><div class="gateway-grid"><div class="framed-card"><h2 style="font-size:1.1rem;margin-bottom:18px">⚙️ Session Configuration</h2><div class="form-row-3" style="grid-template-columns:1fr 1fr"><div class="field-group"><label>Branch / Program</label><div class="readonly-box" id="gw-branch">—</div></div><div class="field-group"><label>Semester</label><div class="readonly-box" id="gw-sem">—</div></div></div><div class="form-row-3" style="grid-template-columns:1fr 1fr"><div class="field-group"><label>Subject</label><div class="readonly-box" id="gw-subject">—</div></div><div class="field-group"><label>Room Number</label><div class="readonly-box" id="gw-room">—</div></div></div><div class="field-group" style="margin-bottom:16px"><label>Scheduled Date & Time Slot</label><div class="readonly-box" id="gw-datetime">—</div></div><div class="form-row-3" style="grid-template-columns:1fr 1fr;margin-bottom:16px"><div class="field-group"><label>Gateway Validity (Mins)</label><input type="number" id="gw-validity" class="field-control" value="5" min="1" max="60" /></div><div class="field-group"><label>QR Rotation Speed (Seconds)</label><select id="qrSpeedSelect" class="field-control" onchange="toggleCustomSpeed()"><option value="5">5 Seconds</option><option value="10" selected>10 Seconds</option><option value="15">15 Seconds</option><option value="30">30 Seconds</option><option value="custom">Custom (Write Sec)</option></select><input type="number" id="customSpeedInput" class="field-control" placeholder="Seconds" value="10" min="3" max="120" style="margin-top:6px;display:none" /></div></div><label class="policy-check"><input type="checkbox" checked /> Enable Geo-Fencing 📍 (15m Radius)</label><label class="policy-check"><input type="checkbox" checked /> Dynamic Rotating QR Code</label><button class="btn-navy" style="width:100%;padding:12px;margin-top:8px" onclick="startLiveGateway()">▶ Initialize Gateway</button></div><div class="framed-card live-qr-panel"><div class="doomsday-clock-container" id="doomsdayClockContainer"><span style="font-size:.82rem;font-weight:600;color:var(--text-muted)">TIME LEFT</span><div class="doomsday-clock" id="gw-timer">05:00</div></div><div class="qr-canvas-holder"><canvas id="qrCanvas" width="210" height="210"></canvas><div class="qr-center-badge"><svg class="logo-light" width="44" height="44"><use href="#logo-light-white-bg"></use></svg><svg class="logo-dark" width="44" height="44"><use href="#logo-dark-blue-bg"></use></svg></div></div><p style="font-size:.82rem;color:var(--text-muted);margin-bottom:6px" id="gw-footer-caption">Click "Initialize Gateway" to start session</p><p style="font-size:.78rem;font-weight:600;color:var(--primary)">Live Headcount: <span id="gw-headcount">0</span> Scanned</p><button class="btn-terminate" id="btnTerminate" onclick="terminateGateway()">⏹ Terminate Session</button></div></div></section>
+        <section id="view-logs" class="view-section"><div class="framed-card"><div class="section-top"><div><h2>Attendance Logs</h2><p>Completed session logs and exports.</p></div><div style="display:flex;gap:10px"><button class="btn-navy" onclick="exportCleanCSV()">📥 Export CSV</button><button class="btn-cancel" onclick="window.print()">🖨️ Print PDF</button></div></div><div id="logsEmptyText" class="empty-schedule-msg">📄 No completed sessions logged yet.</div><table class="scheduled-table" id="logsTable" style="display:none"><thead><tr><th>DATE & SLOT</th><th>SUBJECT</th><th>SEMESTER</th><th>PERIODS</th><th>ROOM</th><th>STATUS</th></tr></thead><tbody id="logsTableBody"></tbody></table></div></section>
+      </div>
+    </main>
+  </div>
+  <div class="gateway-toast" id="gwToast"><span>✔</span> Geo-fenced Gateway Initialized</div>
+  <script>
+    document.getElementById('classDate').min = new Date().toISOString().split('T')[0];
+    document.getElementById('classDate').value = new Date().toISOString().split('T')[0];
+    function toggleSidebar(){ const sb=document.getElementById('sidebar'); const bd=document.getElementById('sidebarBackdrop'); if(sb.classList.contains('open')) closeSidebar(); else { sb.classList.add('open'); bd.classList.add('show'); } }
+    function closeSidebar(){ document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarBackdrop').classList.remove('show'); }
+    document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeSidebar(); });
+    let punchInSec = 6*3600 + 43*60 + 37; let punchTimer=null; let isPunchedIn=true;
+    function fmtHMS(s){ const h=String(Math.floor(s/3600)).padStart(2,'0'); const m=String(Math.floor((s%3600)/60)).padStart(2,'0'); const sec=String(s%60).padStart(2,'0'); return `${h}:${m}:${sec}`; }
+    function startPunchTimer(){ clearInterval(punchTimer); punchTimer=setInterval(()=>{ punchInSec++; document.getElementById('workingHours').innerText=fmtHMS(punchInSec); const pct=Math.min(100, Math.round(punchInSec/(7*3600)*100)); document.getElementById('gaugePercent').innerText=pct+'%'; },1000); }
+    startPunchTimer();
+    function togglePunch(){ const btn=document.getElementById('punchBtn'); if(isPunchedIn){ clearInterval(punchTimer); isPunchedIn=false; btn.innerText='Punch In'; btn.classList.remove('out'); document.getElementById('punchOutTime').innerText=new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}); toggleCheckInStatus(); } else { isPunchedIn=true; btn.innerText='Punch Out'; btn.classList.add('out'); document.getElementById('punchInTime').innerText=new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}); document.getElementById('punchOutTime').innerText='--:--'; startPunchTimer(); if(document.getElementById('checkInPill').classList.contains('checked-out')) toggleCheckInStatus(); } }
+    document.getElementById('punchBtn').innerText='Punch Out'; document.getElementById('punchBtn').classList.add('out');
+    let calDate = new Date(); let calSelected = new Date();
+    function renderCalendar(){
+      const y=calDate.getFullYear(), m=calDate.getMonth();
+      document.getElementById('calMonthLabel').innerText = calDate.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+      const first=new Date(y,m,1); const last=new Date(y,m+1,0); const startDay=first.getDay();
+      let html=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d=>`<div class="dow">${d}</div>`).join('');
+      for(let i=0;i<startDay;i++) html+='<div></div>';
+      const today=new Date();
+      for(let d=1; d<=last.getDate(); d++){
+        const isToday = d===today.getDate() && m===today.getMonth() && y===today.getFullYear();
+        const isSel = d===calSelected.getDate() && m===calSelected.getMonth() && y===calSelected.getFullYear();
+        let cls='cal-day'; if(isToday) cls+=' today'; if(isSel) cls+=' selected';
+        html+=`<div class="${cls}" onclick="selectCalDate(${d},${m},${y},this)">${d}</div>`;
+      }
+      document.getElementById('miniCalendar').innerHTML=html;
+    }
+    function selectCalDate(d,m,y,el){ calSelected=new Date(y,m,d); document.querySelectorAll('.cal-day').forEach(e=>e.classList.remove('selected')); if(el) el.classList.add('selected'); document.getElementById('calSelectedDate').innerText = calSelected.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}); const found = typeof scheduledClasses!=='undefined' ? scheduledClasses.filter(c=>c.dateVal===`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`) : []; document.getElementById('calSelectedText').innerText = found.length ? found.map(c=>`${c.subject} • ${c.startT}-${c.endT} • ${c.room}`).join(' | ') : 'No classes on this day • Click + Create plan to add'; }
+    function changeMonth(delta){ calDate.setMonth(calDate.getMonth()+delta); renderCalendar(); }
+    function setCalFilter(btn,type){ document.querySelectorAll('.cal-legend button').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); if(type==='class'){ openView('addclass', document.getElementById('nav-addclass')); } }
+    renderCalendar();
+    function toggleCheckInStatus(){ const pill=document.getElementById('checkInPill'); const st=document.getElementById('profStatusText'); if(pill.classList.contains('checked-out')){ pill.classList.remove('checked-out'); pill.innerText='● CHECKED IN'; st.innerText='Checked In'; st.style.color='var(--success)'; } else { pill.classList.add('checked-out'); pill.innerText='○ CHECKED OUT'; st.innerText='Checked Out'; st.style.color='var(--danger)'; } }
+    function switchAuthTab(tab){ document.getElementById('tabBtnLogin').classList.toggle('active',tab==='login'); document.getElementById('tabBtnRegister').classList.toggle('active',tab==='register'); document.getElementById('authPaneLogin').classList.toggle('active',tab==='login'); document.getElementById('authPaneRegister').classList.toggle('active',tab==='register'); }
+    function sendFacultyEmail(){ const email=document.getElementById('regEmail').value.trim(); if(!email){ alert('Please enter email address.'); return; } document.getElementById('regFrozenId').innerText='FAC-892X'; alert(`Credentials & Faculty ID sent to ${email}!\nID un-frozen as: FAC-892X`); }
+    function fillPitchCredentials(){ document.getElementById('loginFacultyId').value='FAC-892X'; document.getElementById('loginPassword').value='1234'; }
+    function handleRegistration(e){ e.preventDefault(); const regId=document.getElementById('regCollegeId').value.trim(); const prefix=document.getElementById('regPrefix').value; const first=document.getElementById('regFirst').value.trim(); const last=document.getElementById('regLast').value.trim(); const desig=document.getElementById('regDesignation').value; const email=document.getElementById('regEmail').value.trim(); const dept=document.getElementById('regSpecialization').value; if(regId!=='0000'){ alert('For pitching, please use College Registration ID: 0000'); return; } window.currentUser={name:`${prefix} ${first} ${last}`.trim(),email:email||'faculty@attendqr.edu',dept:dept||'Computer Science & Engineering',designation:desig||'Assistant Professor',id:'FAC-892X'}; alert('Registration Successful! Faculty ID assigned as FAC-892X. Please log in.'); switchAuthTab('login'); fillPitchCredentials(); }
+    function handleLogin(e){ e.preventDefault(); const id=document.getElementById('loginFacultyId').value.trim(); const pass=document.getElementById('loginPassword').value.trim(); if(id!=='FAC-892X'||pass!=='1234'){ alert('Please use Faculty ID: FAC-892X and Password: 1234'); return; } if(!window.currentUser){ window.currentUser={name:'Dr. Pitch Demo',email:'dr.pitch@attendqr.edu',dept:'Computer Science & Engineering',designation:'Associate Professor',id:'FAC-892X'}; } updateDashboardProfile(window.currentUser); document.getElementById('auth-screen').style.display='none'; document.getElementById('portal-screen').classList.add('show'); document.body.classList.add('logged-in'); closeSidebar(); openView('dashboard', document.getElementById('nav-dashboard')); }
+    function updateDashboardProfile(user){ document.getElementById('sidebar-name').innerText=user.name; document.getElementById('sidebar-dept').innerText=user.dept; document.getElementById('prof-name').innerText=user.name; document.getElementById('prof-email').innerText=user.email; document.getElementById('prof-dept').innerText=user.dept; document.getElementById('prof-desig').innerText=user.designation; const pid=document.getElementById('prof-id-dash'); if(pid) pid.innerText=user.id; const h=new Date().getHours(); let g=h<12?'Good Morning':h<17?'Good Afternoon':h<21?'Good Evening':'Good Night'; document.getElementById('greetingTitle').innerText=g; document.getElementById('greetSmall').innerText=`Hi, ${user.name}`; }
+    function handleLogout(){ terminateGateway(); closeSidebar(); document.getElementById('portal-screen').classList.remove('show'); document.body.classList.remove('logged-in'); document.getElementById('auth-screen').style.display='flex'; }
+    const dayRows=['MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY'];
+    const timeSlots=['10:00','11:00','12:00','13:00','14:00','15:00','16:00'];
+    function buildEmptyMatrix(){ const tb=document.getElementById('matrix-body'); tb.innerHTML=''; dayRows.forEach((day, rIdx)=>{ const tr=document.createElement('tr'); let html=`<td class="day-col">📅 ${day}</td>`; timeSlots.forEach((t,cIdx)=>{ if(t==='13:00'){ html+=`<td class="lunch-col" id="cell-${rIdx}-${cIdx}">🍱 LUNCH<br>1-2 PM</td>`; } else { html+=`<td id="cell-${rIdx}-${cIdx}">—</td>`; } }); tr.innerHTML=html; tb.appendChild(tr); }); }
+    buildEmptyMatrix();
+    function openView(viewName, btn){ document.querySelectorAll('.view-section').forEach(v=>v.classList.remove('active')); document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active')); document.getElementById('view-'+viewName).classList.add('active'); if(btn) btn.classList.add('active'); const titles={dashboard:'Overview Dashboard',routine:'My Routine',addclass:'Routine Planner',initqr:'Gateway Initialization',logs:'Attendance Logs'}; document.getElementById('topbar-title').innerText=titles[viewName]; closeSidebar(); }
+    function toggleDarkMode(){ document.body.classList.toggle('dark-mode'); document.getElementById('themeToggleBtn').innerText=document.body.classList.contains('dark-mode')?'☀️':'🌙'; renderQRMatrix(); }
+
+    // ===== FIXED SUBJECTS - BRANCH + SEMESTER WISE =====
+    const SUBJECT_MAP = {
+      "Diploma CST": {
+        "1": ["Applied Mathematics-I", "Applied Physics", "Basic Electronics", "Engineering Drawing", "Communication Skills"],
+        "2": ["Applied Mathematics-II", "Digital Electronics", "C Programming", "Electrical Engineering", "Applied Chemistry"],
+        "3": ["Operating System", "Data Structures & Algorithms", "Computer Networks", "Database Management System (DBMS)", "Digital Electronics & Microprocessor", "Operating System Lab (DCSTC491)"],
+        "4": ["Software Engineering", "Java Programming", "Computer Organization", "Web Technology", "Operating System Lab"],
+        "5": ["Operating System Lab (DCSTC491)", "Python Programming", "Data Structures & Algorithms", "Computer Networks", "Project Work"],
+        "6": ["Advanced Java", "Mobile Application Development", "Cloud Computing", "Project & Viva", "Industrial Training"]
+      },
+      "Diploma CSE": {
+        "1": ["Applied Mathematics-I", "Applied Physics", "Basic Electronics", "Engineering Drawing"],
+        "2": ["Applied Mathematics-II", "Digital Electronics", "C Programming", "Electrical Engineering"],
+        "3": ["Operating System", "Data Structures & Algorithms", "Computer Networks", "DBMS", "Digital Electronics"],
+        "4": ["Java Programming", "Software Engineering", "Computer Organization", "Web Technology"],
+        "5": ["Python Programming", "Operating System Lab", "Computer Networks", "Project Work"],
+        "6": ["Cloud Computing", "Mobile App Development", "Project & Viva"]
+      },
+      "Diploma IT": {
+        "1": ["Applied Mathematics-I", "Applied Physics", "Basic Electronics", "Communication Skills"],
+        "2": ["C Programming", "Digital Electronics", "Applied Mathematics-II", "Electrical Engineering"],
+        "3": ["Operating System", "Data Structures", "Computer Networks", "DBMS", "Web Technology"],
+        "4": ["Java Programming", "Software Engineering", "Computer Organization", "Python Programming"],
+        "5": ["Python Programming", "Database Management", "Computer Networks", "Project Work"],
+        "6": ["Cloud Computing", "Cyber Security", "Project & Viva"]
+      },
+      "B.Tech": {
+        "1": ["Engineering Mathematics-I", "Physics", "Basic Electronics", "Programming in C", "Engineering Drawing"],
+        "2": ["Engineering Mathematics-II", "Chemistry", "Digital Logic", "Data Structures", "Electrical Engineering"],
+        "3": ["Operating Systems", "Design & Analysis of Algorithms", "Database Management Systems", "Computer Networks", "Discrete Mathematics"],
+        "4": ["Software Engineering", "Operating Systems Lab", "Computer Organization", "Theory of Computation", "Java Programming"],
+        "5": ["Advanced Data Structures", "Computer Networks Lab", "Web Technology", "Compiler Design", "Artificial Intelligence"],
+        "6": ["Machine Learning", "Cloud Computing", "Cyber Security", "Project Work"],
+        "7": ["Big Data", "IoT", "Elective-I", "Project Phase-I"],
+        "8": ["Project Phase-II", "Seminar & Viva", "Elective-II"]
+      },
+      "BCA": {
+        "1": ["Computer Fundamentals", "C Programming", "Mathematics-I", "Digital Electronics", "Communication Skills"],
+        "2": ["Data Structures", "DBMS", "Mathematics-II", "Operating System", "Web Technology"],
+        "3": ["Java Programming", "Computer Networks", "Software Engineering", "Python Programming", "DBMS Lab"],
+        "4": ["Advanced Java", "Web Technology Lab", "Computer Graphics", "Operating System Lab"],
+        "5": ["Cloud Computing", "Mobile App Development", "Project Work", "Artificial Intelligence"],
+        "6": ["Project & Viva", "Cyber Security", "Elective"]
+      }
+    };
+    const DEFAULT_SUBJECTS = ["Operating System", "Data Structures & Algorithms", "Computer Networks", "Database Management System", "Python Programming", "Software Engineering"];
+
+    function getSemNumber(semText){
+      if(!semText) return "";
+      let m = semText.match(/(\d+)/);
+      return m ? m[1] : semText;
+    }
+    function updateSubjects(){
+      const branch = document.getElementById('branchSelect').value;
+      const semText = document.getElementById('semesterSelect').value;
+      const subSel = document.getElementById('subjectSelect');
+      if(!branch){
+        subSel.innerHTML = '<option value="">Select Branch & Semester First</option>';
+        return;
+      }
+      const semNum = getSemNumber(semText);
+      let list = [];
+      if(SUBJECT_MAP[branch] && SUBJECT_MAP[branch][semNum]) list = SUBJECT_MAP[branch][semNum];
+      else if(SUBJECT_MAP[branch]) {
+        // fallback: first available semester for that branch
+        let firstKey = Object.keys(SUBJECT_MAP[branch])[0];
+        list = SUBJECT_MAP[branch][firstKey];
+      } else list = DEFAULT_SUBJECTS;
+      subSel.innerHTML = list.map(s=>`<option value="${s}">${s}</option>`).join('');
+      // also show count in label - helps pitch
+      console.log("Subjects loaded:", branch, "Sem", semNum, list);
+    }
+    function onBranchChange(){
+      const branch = document.getElementById('branchSelect').value;
+      const semSel = document.getElementById('semesterSelect');
+      if(!branch){ semSel.innerHTML='<option value="">Select Branch First</option>'; updateSubjects(); return; }
+      let maxSem = branch.startsWith('Diploma') ? 6 : (branch==='B.Tech' ? 8 : 6);
+      let html = '<option value="">Select Semester</option>';
+      for(let i=1;i<=maxSem;i++) html+=`<option value="Semester ${i}">Semester ${i}</option>`;
+      semSel.innerHTML = html;
+      // Auto-select Semester 3 if Diploma CST for demo, else Semester 1
+      // Don't auto-select - let user pick, but pre-fill subjects for Semester 1 so dropdown never empty
+      semSel.value = "";
+      updateSubjects();
+    }
+    function onSemesterChange(){ updateSubjects(); }
+
+    function toggleCustomRoom(){ document.getElementById('customRoomInput').style.display=document.getElementById('roomSelect').value==='custom'?'block':'none'; }
+    function toggleCustomSpeed(){ document.getElementById('customSpeedInput').style.display=document.getElementById('qrSpeedSelect').value==='custom'?'block':'none'; }
+    const periodHours={1:{start:'10:00',end:'11:00'},2:{start:'11:00',end:'12:00'},3:{start:'12:00',end:'13:00'},4:{start:'14:00',end:'15:00'},5:{start:'15:00',end:'16:00'},6:{start:'16:00',end:'17:00'}};
+    function syncPeriodsToTime(){ const hm=parseInt(document.getElementById('periodCount').value,10); const sp=parseInt(document.getElementById('startPeriod').value,10); const ep=Math.min(6,sp+hm-1); document.getElementById('endPeriod').value=ep; document.getElementById('startTimeClock').value=periodHours[sp].start; document.getElementById('endTimeClock').value=periodHours[ep].end; }
+    let scheduledClasses=[];
+    function saveClassToRoutine(){ const branch=document.getElementById('branchSelect').value; const sem=document.getElementById('semesterSelect').value; const subject=document.getElementById('subjectSelect').value; if(!branch||!sem||!subject){ alert('Please select Branch, Semester, and Subject before saving.'); return; } const hm=document.getElementById('periodCount').value; const sp=parseInt(document.getElementById('startPeriod').value,10); const ep=parseInt(document.getElementById('endPeriod').value,10); const dateVal=document.getElementById('classDate').value; const startT=document.getElementById('startTimeClock').value; const endT=document.getElementById('endTimeClock').value; const roomSel=document.getElementById('roomSelect').value; const room=roomSel==='custom'?(document.getElementById('customRoomInput').value||'Lab 302'):roomSel; const item={id:Date.now(),branch,sem,subject,howMany:hm,startP:sp,endP:ep,dateVal,startT,endT,room}; if(scheduledClasses.some(c=>c.dateVal===dateVal&&c.startP===sp&&c.subject===subject)){ alert('This exact class session is already scheduled.'); return; } scheduledClasses.push(item); renderScheduledClasses(); plotClassOnMatrix(item); document.getElementById('stat-scheduled').innerText=scheduledClasses.length; document.getElementById('nextClassText').innerText=subject; document.getElementById('todayClassesList').innerHTML=scheduledClasses.map(c=>`• ${c.subject} • ${c.startT}-${c.endT} • ${c.room} • ${c.dateVal}`).join('<br>'); renderCalendar(); }
+    function renderScheduledClasses(){ const es=document.getElementById('emptyScheduleState'); const cont=document.getElementById('scheduledTableContainer'); const tb=document.getElementById('scheduledClassesBody'); if(scheduledClasses.length===0){ es.style.display='block'; cont.style.display='none'; return; } es.style.display='none'; cont.style.display='block'; tb.innerHTML=''; scheduledClasses.forEach(c=>{ tb.innerHTML+=`<tr><td>📅 ${c.dateVal}<br>🕒 ${c.startT}-${c.endT}</td><td><strong>${c.subject}</strong></td><td>${c.sem}</td><td>${c.howMany} Period(s)</td><td style="color:var(--primary);font-weight:600">${c.room}</td><td><button class="btn-init-qr" onclick="triggerInitQR(${c.id})">⚡ Init QR</button><button class="btn-delete-row" onclick="deleteClass(${c.id})">🗑️</button></td></tr>`; }); }
+    function plotClassOnMatrix(c){ const d=new Date(c.dateVal + 'T00:00:00'); let dayIdx=d.getDay(); if(dayIdx===0) return; let rowIdx=dayIdx-1; let colIdx=timeSlots.indexOf(c.startT.slice(0,5)); if(colIdx===-1) colIdx=timeSlots.indexOf(c.startT); if(rowIdx<0||rowIdx>5||colIdx===-1) return; if(timeSlots[colIdx]==='13:00') return; const cell=document.getElementById(`cell-${rowIdx}-${colIdx}`); if(cell) cell.innerHTML=`<div class="slot-card" onclick="triggerInitQR(${c.id})"><strong>${c.subject}</strong><small>${c.branch} • ${c.room}<br>🕒 ${c.startT}-${c.endT} • ${c.dateVal}</small></div>`; if(parseInt(c.howMany)>1 && colIdx+1 < timeSlots.length && timeSlots[colIdx+1]!=='13:00'){ const cell2=document.getElementById(`cell-${rowIdx}-${colIdx+1}`); if(cell2 && cell2.innerHTML==='—') cell2.innerHTML=`<div class="slot-card" style="opacity:.85" onclick="triggerInitQR(${c.id})"><strong>${c.subject} (Cont.)</strong><small>${c.room}</small></div>`; } }
+    function deleteClass(id){ scheduledClasses=scheduledClasses.filter(c=>c.id!==id); renderScheduledClasses(); buildEmptyMatrix(); scheduledClasses.forEach(plotClassOnMatrix); document.getElementById('stat-scheduled').innerText=scheduledClasses.length; renderCalendar(); }
+    function resetRoutineForm(){ document.getElementById('branchSelect').value=''; onBranchChange(); }
+    let activeGatewayClass=null, countdownInterval=null, qrRotateInterval=null;
+    function triggerInitQR(id){ const f=scheduledClasses.find(c=>c.id===id); if(!f) return; activeGatewayClass=f; const nav=document.getElementById('nav-initqr'); nav.style.display='flex'; document.getElementById('gw-branch').innerText=f.branch; document.getElementById('gw-sem').innerText=f.sem; document.getElementById('gw-subject').innerText=f.subject; document.getElementById('gw-room').innerText=f.room; document.getElementById('gw-datetime').innerText=`${f.dateVal} (${f.startT} - ${f.endT})`; document.getElementById('gw-footer-caption').innerText=`${f.subject} | ${f.room}`; document.getElementById('doomsdayClockContainer').style.display='none'; document.getElementById('btnTerminate').style.display='none'; openView('initqr', nav); renderQRMatrix(); }
+    function renderQRMatrix(){ const canvas=document.getElementById('qrCanvas'); if(!canvas) return; const ctx=canvas.getContext('2d'); const isDark=document.body.classList.contains('dark-mode'); ctx.fillStyle=isDark?'#1d63dc':'#ffffff'; ctx.fillRect(0,0,canvas.width,canvas.height); const cells=25, size=canvas.width/cells; ctx.fillStyle=isDark?'#ffffff':'#0f172a'; for(let r=0;r<cells;r++){ for(let c=0;c<cells;c++){ const corner=(r<7&&c<7)||(r<7&&c>cells-8)||(r>cells-8&&c<7); const center=(r>=9&&r<=15&&c>=9&&c<=15); if(!corner&&!center&&Math.random()>0.46) ctx.fillRect(c*size,r*size,size-0.8,size-0.8); } } function drawFinder(x,y){ ctx.strokeStyle=isDark?'#ffffff':'#0f172a'; ctx.lineWidth=3; ctx.strokeRect(x*size+2,y*size+2,size*6-4,size*6-4); ctx.fillStyle=isDark?'#ffffff':'#0f172a'; ctx.fillRect((x+1.5)*size,(y+1.5)*size,size*3,size*3); } drawFinder(0,0); drawFinder(cells-7,0); drawFinder(0,cells-7); }
+    function startLiveGateway(){ clearInterval(countdownInterval); clearInterval(qrRotateInterval); let sec=parseInt(document.getElementById('gw-validity').value||5,10)*60; document.getElementById('doomsdayClockContainer').style.display='flex'; document.getElementById('btnTerminate').style.display='block'; const toast=document.getElementById('gwToast'); toast.style.display='flex'; setTimeout(()=>{ toast.style.display='none'; },4000); document.getElementById('stat-active-qr').innerText=activeGatewayClass?activeGatewayClass.subject:'Active'; if(activeGatewayClass){ document.getElementById('logsEmptyText').style.display='none'; document.getElementById('logsTable').style.display='table'; document.getElementById('logsTableBody').insertAdjacentHTML('afterbegin', `<tr><td>${activeGatewayClass.dateVal}</td><td><strong>${activeGatewayClass.subject}</strong></td><td>${activeGatewayClass.sem}</td><td>${activeGatewayClass.howMany} Period(s)</td><td>${activeGatewayClass.room}</td><td style="color:var(--success);font-weight:600">Active</td></tr>`); document.getElementById('stat-logs').innerText=document.getElementById('logsTableBody').children.length; } countdownInterval=setInterval(()=>{ sec--; if(sec<=0){ terminateGateway(); return; } document.getElementById('gw-timer').innerText=`${String(Math.floor(sec/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')}`; },1000); let sv=document.getElementById('qrSpeedSelect').value; let rot=sv==='custom'?parseInt(document.getElementById('customSpeedInput').value||10,10):parseInt(sv,10); qrRotateInterval=setInterval(renderQRMatrix, rot*1000); }
+    function terminateGateway(){ clearInterval(countdownInterval); clearInterval(qrRotateInterval); document.getElementById('doomsdayClockContainer').style.display='none'; document.getElementById('btnTerminate').style.display='none'; document.getElementById('gw-timer').innerText='00:00'; document.getElementById('stat-active-qr').innerText='None'; }
+    function exportCleanCSV(){ if(scheduledClasses.length===0){ alert('No sessions recorded.'); return; } let csv='Date,Start,End,Branch,Sem,Subject,Periods,Room\n'; scheduledClasses.forEach(c=>{ csv+=`${c.dateVal},${c.startT},${c.endT},${c.branch},${c.sem},${c.subject},${c.howMany},${c.room}\n`; }); const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download='Attendance_Report.csv'; a.click(); }
+  </script>
+  <div class="schedule-widget-dock"><button class="widget-toggle-pill" onclick="toggleWidgetPopup()"><span>📅</span> <span>Clock & Schedule ▾</span></button><div class="widget-popup-card" id="widgetPopupCard"><div class="widget-popup-header"><span>⏰ Live Time & Schedule</span><button class="widget-popup-close" onclick="toggleWidgetPopup()">✕</button></div><div><div class="widget-section-title">Current Time</div><div class="widget-clock" id="liveClockWidget">09:02:00 AM</div></div><div><div class="widget-section-title">Calendar Date</div><div class="widget-date-display" id="liveDateWidget">Sat, Nov 7, 2026</div></div><div><div class="widget-section-title">Upcoming Class / Session</div><div class="widget-upcoming-box"><strong>Operating System Lab</strong><span>🕒 10:00 AM - 11:00 AM (Lab 302)</span></div></div><button class="widget-quick-btn" onclick="openScheduleQuickAction()">+ Schedule New Attendance</button></div></div>
+  <script>
+    function toggleWidgetPopup(){ document.getElementById('widgetPopupCard').classList.toggle('open'); }
+    function updateDockClock(){ const now=new Date(); const t=now.toLocaleTimeString(); const d=now.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'}); const ce=document.getElementById('liveClockWidget'); const de=document.getElementById('liveDateWidget'); if(ce) ce.innerText=t; if(de) de.innerText=d; }
+    setInterval(updateDockClock,1000); updateDockClock();
+    function openScheduleQuickAction(){ toggleWidgetPopup(); openView('addclass', document.getElementById('nav-addclass')); }
+  </script>
+</body>
+</html>
